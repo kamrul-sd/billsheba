@@ -1,12 +1,18 @@
-"use client"
+// "use client"
 import { Clock, CreditCard, DollarSign, Package, UserCheck, Users } from "lucide-react"
+import { cacheLife, cacheTag } from "next/cache"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
-import { useSuspenseGetDashboardData } from "@/hooks/rq/use-dashboard-query"
-// import { getDashboardData } from "@/lib/apis/auth"
+// import { useSuspenseGetDashboardData } from "@/hooks/rq/use-dashboard-query"
+import { getDashboardData } from "@/lib/apis/auth"
 import { currencyFormtter } from "@/lib/text-formatters"
 
-export function StatsGrid() {
-  const { data } = useSuspenseGetDashboardData()
+export async function StatsGrid() {
+  "use cache: private"
+
+  cacheLife("minutes")
+  cacheTag("dashboard")
+
+  const data = await getDashboardData()
 
   const stats = [
     {

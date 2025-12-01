@@ -24,39 +24,40 @@ export function PaymentsTable() {
 
   return (
     <div className="space-y-4">
-      <Suspense>
+      hello
+      {/* <Suspense>
         <PaymentsTableToolbar table={table} />
-      </Suspense>
 
-      <div className="block md:hidden">
-        <DataTableCardView
-          loading={isLoading}
-          table={table}
-          mapRow={(row) => {
-            const p = row.original
+        <div className="block md:hidden">
+          <DataTableCardView
+            loading={isLoading}
+            table={table}
+            mapRow={(row) => {
+              const p = row.original
 
-            const collectorName = `${p.entry_by?.last_name || "unknown"}`
-            return {
-              title: p.customer.username || p.customer.name,
-              description: `Collected By ${collectorName} · ${p.amount} ${p.payment_method}`,
-              avatar: generateAvatarUrl(p.customer.username || p.customer.name),
-              uid: p.uid,
-            }
-          }}
-          renderRowActions={(row) => <PaymentsTableRowActions row={row} />}
-          onItemClick={(item, row) => {
-            if (row) {
-              setIsViewPaymentDialogOpen(true)
-              setSelectedPayment(row.original)
-            }
-          }}
-        />
-      </div>
+              const collectorName = `${p.entry_by?.last_name || "unknown"}`
+              return {
+                title: p.customer.username || p.customer.name,
+                description: `Collected By ${collectorName} · ${p.amount} ${p.payment_method}`,
+                avatar: generateAvatarUrl(p.customer.username || p.customer.name),
+                uid: p.uid,
+              }
+            }}
+            renderRowActions={(row) => <PaymentsTableRowActions row={row} />}
+            onItemClick={(_item, row) => {
+              if (row) {
+                setIsViewPaymentDialogOpen(true)
+                setSelectedPayment(row.original)
+              }
+            }}
+          />
+        </div>
 
-      <div className="hidden md:block">{render}</div>
+        <div className="hidden md:block">{render}</div>
 
-      <PaymentsUpsertDialog />
-      <ViewPaymentsDialog />
+        <PaymentsUpsertDialog />
+        <ViewPaymentsDialog />
+      </Suspense> */}
     </div>
   )
 }

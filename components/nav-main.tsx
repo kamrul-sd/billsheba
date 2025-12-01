@@ -19,7 +19,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { useSession, useSuspenseSession } from "@/hooks/rq/use-auth-query"
+import { useSession } from "@/hooks/rq/use-auth-query"
 import { getCustomerListOptions } from "@/hooks/rq/use-customers-query"
 import { getDashboardDataOptions } from "@/hooks/rq/use-dashboard-query"
 import { getOrganizationListOptions } from "@/hooks/rq/use-organizations-query"
@@ -27,6 +27,7 @@ import { getPackageListOptions } from "@/hooks/rq/use-packages-query"
 import { getPaymentListOptions } from "@/hooks/rq/use-payment-query"
 import { getSessionsOptions } from "@/hooks/rq/use-sessions-query"
 import { getUserListOptions } from "@/hooks/rq/use-users-query"
+import { Skeleton } from "./ui/skeleton"
 
 const navMain = [
   {
@@ -79,11 +80,25 @@ const navMain = [
   },
 ]
 
+function NavListSkeleton() {
+  return (
+    <div>
+      {Array.from({ length: 7 }).map((_list, i) => (
+        <Skeleton key={i} className="m-1 h-8" />
+      ))}
+    </div>
+  )
+}
+
 export function NavMain() {
   const pathname = usePathname()
   const queryClient = useQueryClient()
 
-  const { data: session } = useSuspenseSession()
+  const { data: session } = useSession()
+
+  if (!session) {
+    return <NavListSkeleton />
+  }
 
   return (
     <SidebarGroup>

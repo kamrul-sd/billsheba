@@ -27,7 +27,7 @@ export function PaymentsTableToolbar<TData>({ table }: DataTableToolbarProps<TDa
   const { setPaymentMutationType, setIsUpsertPaymentDialogOpen } = usePaymentsStore()
   const [searchField, setSearchField] = React.useState("customer")
 
-  const currentMonth = months[new Date().getMonth()].value
+  // const currentMonth = months[new Date().getMonth()].value
 
   return (
     <div className="flex md:items-center md:justify-between flex-col md:flex-row gap-2">
@@ -64,7 +64,7 @@ export function PaymentsTableToolbar<TData>({ table }: DataTableToolbarProps<TDa
             column={table.getColumn("billing_month")}
             title="Month"
             options={months}
-            defaultValues={[currentMonth]}
+            // defaultValues={[currentMonth]}
           />
         )}
 

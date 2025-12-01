@@ -32,9 +32,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             <div className="text-xs text-center text-red-500">Failed to load</div>
           }
         >
-          <Suspense fallback={<NavListSkeleton />}>
-            <NavMain />
-          </Suspense>
+          <NavMain />
         </ErrorBoundary>
       </SidebarContent>
       <SidebarFooter>
@@ -42,15 +40,5 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
-}
-
-function NavListSkeleton() {
-  return (
-    <div>
-      {Array.from({ length: 7 }).map((_list, i) => (
-        <Skeleton key={i} className="m-1 h-8" />
-      ))}
-    </div>
   )
 }
