@@ -81,8 +81,6 @@ export function DataTableCardView<TData>({
               onItemClick ? "cursor-pointer hover:bg-muted/50 transition-colors" : ""
             }
             onClick={(e) => {
-              if (e.target !== e.currentTarget) return
-
               onItemClick?.(item, row)
             }}
           >
@@ -101,7 +99,7 @@ export function DataTableCardView<TData>({
                 {item.description}
               </ItemDescription>
             </ItemContent>
-            <ItemActions>
+            <ItemActions onClick={(e) => e.stopPropagation()}>
               {row && renderRowActions ? (
                 renderRowActions(row)
               ) : renderItemActions ? (
