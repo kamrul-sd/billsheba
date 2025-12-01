@@ -70,7 +70,9 @@ export const columns: ColumnDef<Customer>[] = [
     cell: ({ row }) => {
       return (
         <div>
-          <div className="max-w-[500px] truncate font-medium">{row.original.address}</div>
+          <div className="max-w-[500px] truncate font-medium">
+            {row.original.address || "-"}
+          </div>
           <div className="max-w-[500px] truncate text-xs text-slate-500">
             {row.original.phone}
           </div>
@@ -105,7 +107,7 @@ export const columns: ColumnDef<Customer>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Expiry Date" />,
     cell: ({ row }) => {
       const date = row.original.subscription_end_date
-      const formatted = date ? format(new Date(date), "dd MMM yyyy") : "N/A"
+      const formatted = date ? format(new Date(date), "dd MMM yyyy") : "-"
       return formatted
     },
   },
