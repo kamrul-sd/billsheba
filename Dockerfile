@@ -1,116 +1,47 @@
-# syntax=docker.io/docker/dockerfile:1
+# Build stage
+FROM node:20-alpine AS builder
 
-FROM node:20-alpine AS base
-
-# Install dependencies only when needed
-FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# Install pnpm
+RUN npm install -g pnpm@9.0.6
 
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
 
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
 COPY . .
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-# ENV NEXT_TELEMETRY_DISABLED=1
+# Build the application
+RUN pnpm build
 
-RUN \
-  if [ -f yarn.lock ]; then yarn run build; \
-  elif [ -f package-lock.json ]; then npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# Production stage
+FROM node:20-alpine
 
-# Production image, copy all the files and run next
-FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED=1
+# Install pnpm in production image
+RUN npm install -g pnpm@9.0.6
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Copy package files from builder
+COPY package.json pnpm-lock.yaml ./
 
+# Install production dependencies only
+RUN pnpm install --frozen-lockfile --prod
+
+# Copy built application from builder
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
-
+# Expose port 3000
 EXPOSE 3000
 
-ENV PORT=3000
+# Set environment variables
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
-ENV HOSTNAME="0.0.0.0"
-CMD ["node", "server.js"]
-
-
-# # ---------- Stage 1: Build ----------
-# FROM node:20-alpine AS builder
-
-# WORKDIR /app
-
-# # Install pnpm globally
-# RUN npm install -g pnpm
-
-# # Copy package manifests first (for better caching)
-# COPY package.json pnpm-lock.yaml ./
-
-# # Install dependencies
-# RUN pnpm install --frozen-lockfile
-
-# # Copy the rest of the source code
-# COPY . .
-
-# # Build Next.js app for production (creates .next/standalone)
-# RUN pnpm run build
-
-# # ---------- Stage 2: Run ----------
-# FROM node:20-alpine AS runner
-
-# WORKDIR /app
-
-# ENV NODE_ENV=production
-
-# # Create a non-root user for security
-# RUN addgroup --system --gid 1001 nodejs && \
-#     adduser --system --uid 1001 nextjs
-
-# # Copy standalone build files from builder stage
-# # Next.js standalone output includes node_modules and server.js in .next/standalone
-# COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-# COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-
-# # Switch to non-root user
-# USER nextjs
-
-# # Expose the port that Next.js runs on
-# EXPOSE 3000
-
-# ENV PORT=3000
-# ENV HOSTNAME="0.0.0.0"
-
-# # Run the app
-# CMD ["node", "server.js"]
+# Start the application
+CMD ["pnpm", "start"]
